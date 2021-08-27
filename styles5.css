@@ -1,0 +1,11 @@
+.animal-list {
+  list-style-type: none;
+}
+
+.animal-line {
+  line-height: 4;
+}
+
+.hidden {
+  display: none;
+}
