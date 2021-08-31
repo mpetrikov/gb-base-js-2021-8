@@ -26,6 +26,9 @@ const gameState = {
 
 const htmlPositionAttributeName = "cell-position";
 
+/**
+ * Создание двойного массива и заполнение игрового поля null
+ */
 const createGameField = () => {
   //   gameField = [];
 
@@ -43,6 +46,9 @@ const createGameField = () => {
   });
 };
 
+/**
+ * Установка id в DOM элементы, для взаимодействия с ними
+ */
 const setDomTreeAttributes = () => {
   const allCells = document.querySelectorAll(".cell");
   for (let i = 0; i < allCells.length; i++) {
@@ -53,14 +59,23 @@ const setDomTreeAttributes = () => {
   }
 };
 
+/**
+ * Генерация id ячейки
+ */
 const generateCellId = (rowNumber, columnNumber) => {
   return `${htmlPositionAttributeName}${rowNumber},${columnNumber}`;
 };
 
+/**
+ * Получение DOM элемента по позиции в gameField
+ */
 const getCellDomElement = (rowNumber, columnNumber) => {
   return document.getElementById(generateCellId(rowNumber, columnNumber));
 };
 
+/**
+ * Получение позиции в gameField из id DOM элемента
+ */
 const getPositionById = (cellElement) => {
   const cellId = cellElement.id;
   const arrayOfPosition = cellId
@@ -73,6 +88,9 @@ const getPositionById = (cellElement) => {
   };
 };
 
+/**
+ * Установка бомбы (gameField и DOM)
+ */
 const setBombPosition = (rowNumber, columnNumber) => {
   gameField[rowNumber][columnNumber] = CELL_TYPE.BOMB;
 
@@ -82,6 +100,9 @@ const setBombPosition = (rowNumber, columnNumber) => {
   startBombermanElement.classList.add(CELL_TYPE.BOMB);
 };
 
+/**
+ * Установка позиции бомбермена, с удалением старой позиции
+ */
 const setBombermanPosition = (rowNumber, columnNumber) => {
   gameState.bomberman.position.rowNumber = rowNumber;
   gameState.bomberman.position.columnNumber = columnNumber;
@@ -103,12 +124,18 @@ const setBombermanPosition = (rowNumber, columnNumber) => {
   startBombermanElement.classList.add(CELL_TYPE.BOMBERMAN);
 };
 
+/**
+ * Инициализация игрового поля
+ */
 export const initializeGameField = () => {
   createGameField();
   setDomTreeAttributes();
   setBombermanPosition(0, 0);
 };
 
+/**
+ * Обработчик нажатий на клавиатуре
+ */
 export const setUpKeyboardHandlers = () => {
   document.body.addEventListener("keydown", (event) => {
     switch (event.key) {
@@ -155,6 +182,9 @@ export const setUpKeyboardHandlers = () => {
   });
 };
 
+/**
+ * Взрыв бомбы, рисование крестика
+ */
 const explodeBomb = (i) => {
   // удаление иконки бомбы
   const explodedBomb = gameState.bombs.splice(i, 1)[0];
@@ -165,7 +195,7 @@ const explodeBomb = (i) => {
   );
   elementWithBomb.classList.remove(CELL_TYPE.BOMB);
 
-  // рисование взрыва
+  // рисование взрыва по вертикали (gameState и DOM)
   for (let i = 0; i < gameState.bombExplodeSize * 2 - 1; i++) {
     const explodeRowNumber =
       explodedBomb.rowNumber - (gameState.bombExplodeSize - 1) + i;
@@ -177,11 +207,14 @@ const explodeBomb = (i) => {
       explodedBomb.columnNumber
     );
     cellForExplode.classList.add(CELL_TYPE.EXPLOSION);
+
+    // gameState
     gameState.bombExploseCells[
       `${explodeRowNumber},${explodedBomb.columnNumber}`
     ] = Date.now();
   }
 
+  // рисование взрыва по горизонтали (gameState и DOM)
   for (let i = 0; i < gameState.bombExplodeSize * 2 - 1; i++) {
     const explodeColumnNumber =
       explodedBomb.columnNumber - (gameState.bombExplodeSize - 1) + i;
@@ -193,12 +226,18 @@ const explodeBomb = (i) => {
       explodeColumnNumber
     );
     cellForExplode.classList.add(CELL_TYPE.EXPLOSION);
+
+    // gameState
     gameState.bombExploseCells[
       `${explodedBomb.rowNumber},${explodeColumnNumber}`
     ] = Date.now();
   }
 };
 
+/**
+ * Проверка что пора бомбе взорваться
+ * Вызывается на каждом тике
+ */
 const checkBombsExplosion = () => {
   const currentTime = Date.now();
   for (let i = gameState.bombs.length - 1; i >= 0; i--) {
@@ -210,6 +249,10 @@ const checkBombsExplosion = () => {
   }
 };
 
+/**
+ * Тушения взрыва бомб, в gameState и DOM дереве
+ * Вызывается каждый тик
+ */
 const checkBombsStop = () => {
   const currentTime = Date.now();
   for (const explodeCellKey in gameState.bombExploseCells) {
@@ -228,6 +271,9 @@ const checkBombsStop = () => {
   }
 };
 
+/**
+ * Обработчик на каждом тике игры
+ */
 export const startGame = () => {
   gameState.gameTickHandler = setInterval(() => {
     checkBombsExplosion();
@@ -235,6 +281,9 @@ export const startGame = () => {
   }, 1000 / tickPerSecond);
 };
 
+/**
+ * Остановка обработчика тиков игры
+ */
 export const stopGame = () => {
   clearInterval(gameState.gameTickHandler);
 };
